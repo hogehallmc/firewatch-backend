@@ -31,7 +31,7 @@ async function grabHallData(hallToFetch) {
             var dateArray = [];
 
             // loop through all records
-            for (let i = (jsonData.table.rows.length - 1); i > 0; i--) {
+            for (let i = (jsonData.table.rows.length - 1); i >= 0; i--) {
                 let currentRow = jsonData.table.rows[i];
 
                 let currentAlarmDict = {};
@@ -82,7 +82,7 @@ async function retrieveAllAlarms(activeHalls) {
 }
 
 async function init() {
-    let activeHalls = [ "Pritchard", "Hoge", "Slusher", "CID", "O Shag", "AJ", "Cochrane", "Vawter", "Johnson", "The Hub (Apartment)" ];
+    let activeHalls = [ "Pritchard", "Hoge", "Slusher", "CID", "O Shag", "AJ", "Cochrane", "Vawter", "Johnson", "Harper", "The Hub (Apartment)" ];
     let allHallData = await(retrieveAllAlarms(activeHalls));
     let alarmData = {};
 
