@@ -1,5 +1,3 @@
 # VT Firewatch Backend
 
-This code runs every hours and pulls data from a google sheets page.
-
-Note - the server actually uses node-fetch rather than fetch
+This code runs every 10 minutes and pulls data from a google sheets page.
