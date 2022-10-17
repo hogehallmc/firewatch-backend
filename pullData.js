@@ -37,7 +37,7 @@ async function grabHallData(hallToFetch) {
                 let currentAlarmDict = {};
 
                 // should we add it to the website?
-                if (currentRow.c[1].v === "y" || currentRow.c[1].v === "Y") {
+                if (currentRow.c[1] !== null && (currentRow.c[1].v === "y" || currentRow.c[1].v === "Y")) {
 
                     // lets make sure the date entry actually exists
                     if (currentRow.c[0].v !== null) {
@@ -51,14 +51,10 @@ async function grabHallData(hallToFetch) {
                             currentAlarmDict["comments"] = null;
                         }
 
-                        if (currentRow.c[3] !== null) {
-                            if (currentRow.c[3].v === 'y' || currentRow.c[3].v === 'Y') {
-                                    currentAlarmDict["includeComments"] = true;
-                            } else {
-                                    currentAlarmDict["includeComments"] = false;
-                            }
+                        if (currentRow.c[3] !== null && (currentRow.c[3].v === 'y' || currentRow.c[3].v === 'Y')) {
+                                currentAlarmDict["includeComments"] = true;
                         } else {
-                            currentAlarmDict["includeComments"] = false;
+                                currentAlarmDict["includeComments"] = false;
                         }
                         
                         dateArray.push(currentAlarmDict);
@@ -82,7 +78,7 @@ async function retrieveAllAlarms(activeHalls) {
 }
 
 async function init() {
-    let activeHalls = [ "Pritchard", "Hoge", "Slusher", "CID", "O Shag", "AJ", "Cochrane", "Vawter", "Johnson", "Harper", "The Hub (Apartment)" ];
+    let activeHalls = [ "AJ", "Campbell", "Cochrane", "CID", "Eggleston", "GLC", "Harper", "Hillcrest", "Hoge", "Johnson", "Miles", "New Hall West", "New Hall East", "Newman", "O Shag", "Payne", "Pearson East", "Pearson West", "Peddrew-Yates", "Pritchard", "Slusher", "Vawter", "Whitehurst" ];
     let allHallData = await(retrieveAllAlarms(activeHalls));
     let alarmData = {};
 
