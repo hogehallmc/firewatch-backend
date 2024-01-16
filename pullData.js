@@ -17,10 +17,9 @@ function parseAlarmString(stringToParse) {
     return returnDate;
 }
 
-// connect to the spreadsheet and pull data from a 5ticular sheet (specifed
-// by the hallToFetch variable)
-async function grabHallData(hallToFetch) {
-    const url = `${base}&sheet=${hallToFetch}&tq=${query}`
+// get the current semester start date
+async function getSemesterStartDate() {
+    const url = `${base}&sheet=Hall%20List&tq=${query}`
     let dateArray = await fetch(url)
         .then(res => res.text())
         .then(rep => {
@@ -28,58 +27,98 @@ async function grabHallData(hallToFetch) {
             //Remove additional text and extract only JSON:
             const jsonData = JSON.parse(rep.substring(47).slice(0, -2));
 
-            var dateArray = [];
-
-            // loop through all records
-            for (let i = (jsonData.table.rows.length - 1); i >= 0; i--) {
-                let currentRow = jsonData.table.rows[i];
-
-                let currentAlarmDict = {};
-
-                // should we add it to the website?
-                if (currentRow.c[1] !== null && (currentRow.c[1].v === "y" || currentRow.c[1].v === "Y")) {
-
-                    // lets make sure the date entry actually exists
-                    if (currentRow.c[0].v !== null) {
-                        // add the alarm record to our return array
-                        currentAlarmDict["date"] = parseAlarmString(currentRow.c[0].v);
-
-                        // add any notes on that alarm to our return array
-                        if (currentRow.c[2] !== null) {
-                            currentAlarmDict["comments"] = currentRow.c[2].v;
-                        } else {
-                            currentAlarmDict["comments"] = null;
-                        }
-
-                        if (currentRow.c[3] !== null && (currentRow.c[3].v === 'y' || currentRow.c[3].v === 'Y')) {
-                                currentAlarmDict["includeComments"] = true;
-                        } else {
-                                currentAlarmDict["includeComments"] = false;
-                        }
-                        
-                        dateArray.push(currentAlarmDict);
-                    }
-                }
-            }
-
-            return dateArray;
+            let currentRow = jsonData.table.rows[0];
+            semesterStartDate = parseAlarmString(currentRow.c[4].v);
         })
+    
+    return semesterStartDate;
+}
+
+
+function sortAlarmEntry(dateArray, currentDate, semesterStartDate, currentRow) {
+    let currentAlarmDict = {};
+
+    // add the alarm record to our return array
+    currentAlarmDict["date"] = currentDate;
+
+    // add any notes on that alarm to our return array
+    if (currentRow.c[2] !== null) {
+        currentAlarmDict["comments"] = currentRow.c[2].v;
+    } else {
+        currentAlarmDict["comments"] = null;
+    }
+
+    if (currentRow.c[3] !== null && (currentRow.c[3].v === 'y' || currentRow.c[3].v === 'Y')) {
+            currentAlarmDict["includeComments"] = true;
+    } else {
+            currentAlarmDict["includeComments"] = false;
+    }
+
+    if (currentDate >= semesterStartDate) {
+        currentAlarmDict['thisSemster'] = true;
+    } else {
+        currentAlarmDict['thisSemster'] = false;
+    }
+    
+    dateArray.push(currentAlarmDict);
+    
 
     return dateArray;
 }
 
-async function retrieveAllAlarms(activeHalls) {
+// connect to the spreadsheet and pull data from a 5ticular sheet (specifed
+// by the hallToFetch variable)
+async function grabHallData(hallToFetch, semesterStartDate) {
+    const url = `${base}&sheet=${hallToFetch}&tq=${query}`
+    let currentSemesterAlarms = await fetch(url)
+        .then(res => res.text())
+        .then(rep => {
+
+            //Remove additional text and extract only JSON:
+            const jsonData = JSON.parse(rep.substring(47).slice(0, -2));
+
+            var currentSemesterAlarms = [];
+
+            // loop through all records
+            for (let i = (jsonData.table.rows.length - 1); i >= 0; i--) {
+                let currentRow = jsonData.table.rows[i];
+                
+                // should we add it to the website?
+                if (currentRow.c[1] !== null && (currentRow.c[1].v === "y" || currentRow.c[1].v === "Y")) {
+                    // lets make sure the date entry actually exists
+                    if (currentRow.c[0].v !== null) {
+                        let currentDate = parseAlarmString(currentRow.c[0].v);
+
+                        // add the alarm to our all time alarms list
+                        currentSemesterAlarms = sortAlarmEntry(currentSemesterAlarms, currentDate, semesterStartDate, currentRow);
+
+                        // did the alarm happen this semester?
+                        
+                       
+                    }
+                }
+
+            }
+
+            return currentSemesterAlarms;
+        })
+
+    return currentSemesterAlarms;
+}
+
+async function retrieveAllAlarms(activeHalls, semesterStartDate) {
     let allHallData = {};
     for (let i = 0; i < activeHalls.length; i++) {
-        let currentHallData = await(grabHallData(activeHalls[i]));
-        allHallData[activeHalls[i]] = currentHallData;
+        let currentSemesterAlarms = await(grabHallData(activeHalls[i], semesterStartDate));
+        allHallData[activeHalls[i]] = currentSemesterAlarms;
     }
     return allHallData;
 }
 
 async function init() {
     let activeHalls = [ "AJ", "Campbell", "Cochrane", "CID", "Eggleston", "GLC", "Harper", "Hillcrest", "Hoge", "Johnson", "Miles", "New Hall West", "New Hall East", "Newman", "O Shag", "Payne", "Pearson East", "Pearson West", "Peddrew-Yates", "Pritchard", "Slusher", "Vawter", "Whitehurst" ];
-    let allHallData = await(retrieveAllAlarms(activeHalls));
+    let semesterStartDate = await(getSemesterStartDate());
+    let allHallData = await(retrieveAllAlarms(activeHalls, semesterStartDate));
     let alarmData = {};
 
     alarmData["lastUpdate"] = new Date();
@@ -87,7 +126,7 @@ async function init() {
     
     const fs = require('fs');
 
-    fs.writeFileSync('/var/www/pritchardalarms.com/alarmdata/data.json', JSON.stringify(alarmData), err => {
+    fs.writeFileSync('data.json', JSON.stringify(alarmData), err => {
     if (err) {
         console.error(err);
     }
