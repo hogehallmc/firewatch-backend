@@ -54,9 +54,9 @@ function sortAlarmEntry(dateArray, currentDate, semesterStartDate, currentRow) {
     }
 
     if (currentDate >= semesterStartDate) {
-        currentAlarmDict['thisSemster'] = true;
+        currentAlarmDict['thisSemester'] = true;
     } else {
-        currentAlarmDict['thisSemster'] = false;
+        currentAlarmDict['thisSemester'] = false;
     }
     
     dateArray.push(currentAlarmDict);
