@@ -15,17 +15,16 @@ async function getHallList() {
           const jsonData = JSON.parse(rep.substring(47).slice(0, -2));
 
           let numOfHalls = (jsonData.table.rows.length - 1);
-          let hallList = [];
+          let hallList = {};
 
           for (let i = 1; i <= numOfHalls; i++) {
             let currentRow = jsonData.table.rows[i];
             let currentHall = {}
 
             currentHall['name'] = currentRow.c[0].v
-            currentHall['id'] = currentRow.c[1].v
             currentHall['img'] = currentRow.c[2].v
 
-            hallList.push(currentHall)
+            hallList[currentRow.c[1].v] = currentHall
           }
 
           return hallList
