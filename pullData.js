@@ -2,7 +2,6 @@
 const sheetId = '1x5RhQWfxfx-qEgNC4a6Eb38i5FUFkXkq6YI_6DoxMHQ';
 const base = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?`;
 const query = encodeURIComponent('Select *');
-const data = [];
 const fetch = require('node-fetch');
 
 // lets not look to closely at this function, trust me, im not proud
@@ -19,7 +18,7 @@ function parseAlarmString(stringToParse) {
 
 // get the current semester start date
 async function getSemesterStartDate() {
-    const url = `${base}&sheet=Hall%20List&tq=${query}`
+    const url = `${base}&sheet=Website%20Control%20Panel&tq=${query}`
     let dateArray = await fetch(url)
         .then(res => res.text())
         .then(rep => {
@@ -28,7 +27,7 @@ async function getSemesterStartDate() {
             const jsonData = JSON.parse(rep.substring(47).slice(0, -2));
 
             let currentRow = jsonData.table.rows[0];
-            semesterStartDate = parseAlarmString(currentRow.c[4].v);
+            semesterStartDate = parseAlarmString(currentRow.c[8].v);
         })
     
     return semesterStartDate;
