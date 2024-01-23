@@ -124,7 +124,7 @@ async function getHallList(fs) {
 async function init() {
     const fs = require('fs');
 
-    let activeHalls = await getGHallList(fs);
+    let activeHalls = await getHallList(fs);
     let semesterStartDate = await(getSemesterStartDate());
     let allHallData = await(retrieveAllAlarms(activeHalls, semesterStartDate));
     let alarmData = {};
