@@ -114,8 +114,17 @@ async function retrieveAllAlarms(activeHalls, semesterStartDate) {
     return allHallData;
 }
 
+async function getHallList(fs) {
+    let hallList = JSON.parse(await fs.readFileSync('hallList.json', { encoding: 'utf8' }));
+    hallList = Object.keys(hallList);
+
+    return hallList;
+}
+
 async function init() {
-    let activeHalls = [ "AJ", "Campbell", "Cochrane", "CID", "Eggleston", "GLC", "Harper", "Hillcrest", "Hoge", "Johnson", "Miles", "New Hall West", "New Hall East", "Newman", "O Shag", "Payne", "Pearson East", "Pearson West", "Peddrew-Yates", "Pritchard", "Slusher", "Vawter", "Whitehurst" ];
+    const fs = require('fs');
+
+    let activeHalls = await getHallList(fs);
     let semesterStartDate = await(getSemesterStartDate());
     let allHallData = await(retrieveAllAlarms(activeHalls, semesterStartDate));
     let alarmData = {};
@@ -123,7 +132,7 @@ async function init() {
     alarmData["lastUpdate"] = new Date();
     alarmData["halls"] = allHallData;
     
-    const fs = require('fs');
+    //const fs = require('fs');
 
     fs.writeFileSync('data.json', JSON.stringify(alarmData), err => {
     if (err) {
