@@ -21,8 +21,14 @@ async function getHallList() {
             let currentRow = jsonData.table.rows[i];
             let currentHall = {}
 
-            currentHall['name'] = currentRow.c[0].v
-            currentHall['img'] = currentRow.c[2].v
+            currentHall['name'] = currentRow.c[0].v;
+            currentHall['img'] = currentRow.c[2].v;
+
+            if (currentRow.c[3] !== null) {
+              currentHall['imgCredit'] = currentRow.c[3].v;
+            } else {
+              currentHall['imgCredit'] = null;
+            }
 
             hallList[currentRow.c[1].v] = currentHall
           }
